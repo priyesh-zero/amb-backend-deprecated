@@ -5,6 +5,8 @@ pipelines:
       release/deploy:
           - step:
               name: test pipeline
+              deployment: test
               script:
-                  - echo "Hello World "$HEROKU_API_KEY
+                  - echo $HEROKU_API_KEY
+  
   
