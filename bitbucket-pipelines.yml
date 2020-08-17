@@ -6,6 +6,8 @@ pipelines:
           - step:
               name: Push to Heroku Container
               deployment: test
+              services:
+                  - docker
               script:
                   - echo $HEROKU_API_KEY
                   - echo $HEROKU_APP_NAME
