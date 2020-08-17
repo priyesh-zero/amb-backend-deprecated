@@ -1,0 +1,9 @@
+*
+!_base/**/*
+!_interface/**/*
+!prisma/**/*
+!routes/**/*
+!server.ts
+!index.sh
+!tsconfig.json
+!package.json

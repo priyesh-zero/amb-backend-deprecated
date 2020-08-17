@@ -20,4 +20,6 @@ RUN yarn --prod
 
 COPY --from=BUILDER /usr/src/app/dist/ . 
 
-CMD ["node", "server.js"]
+COPY --from=BUILDER /usr/src/app/index.sh .
+
+CMD ["yarn", "docker"]
