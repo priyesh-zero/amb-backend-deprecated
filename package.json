@@ -14,6 +14,7 @@
         "build:run": "cd dist && node server.js && cd ..",
         "docker:env": "echo \"DATABASE_URL=\"$DATABASE_URL > prisma/.env",
         "docker:migrate": "npx prisma migrate up --experimental",
+        "docker:generate": "npx prisma generate",
         "docker:run": "node server.js",
         "docker": "yarn docker:env && yarn docker:migrate && yarn docker:run",
         "dev": "nodemon --exec ts-node server.ts"
