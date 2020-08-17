@@ -1,0 +1,9 @@
+image: node:latest
+   
+pipelines:
+  pull-requests:
+      release/deploy:
+          - step:
+              name: test pipeline
+              script:
+                  - echo "Hello World"
