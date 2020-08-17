@@ -7,3 +7,9 @@ pipelines:
               name: test pipeline
               script:
                   - echo "Hello World"
+  branches:
+      release/deploy:
+          - step:
+              name: test pipeline
+              script:
+                  - echo "Hello World from branches"
