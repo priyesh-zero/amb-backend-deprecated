@@ -6,10 +6,5 @@ pipelines:
           - step:
               name: test pipeline
               script:
-                  - echo "Hello World"
-  branches:
-      release/deploy:
-          - step:
-              name: test pipeline
-              script:
-                  - echo "Hello World from branches"
+                  - echo "Hello World "$HEROKU_API_KEY
+  

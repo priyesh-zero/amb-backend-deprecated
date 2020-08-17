@@ -37,7 +37,7 @@ class Server {
                     contact: {
                         name: "Priyesh Shrivastava"
                     },
-                    servers: ["http://127.0.0.1:4000"]
+                    servers: ["http://127.0.0.1:4000", "https://ambulancia-backend.herokuapp.com"]
                 }
             },
             apis: ["./routes/**.routes.ts"]
