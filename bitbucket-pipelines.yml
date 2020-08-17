@@ -4,7 +4,13 @@ pipelines:
   branches:
       release/deploy:
           - step:
-              name: test pipeline
+              name: Push to Heroku Container
+              deployment: test
               script:
-                  - echo "Hello World "$HEROKU_API_KEY
+                  - echo $HEROKU_API_KEY
+                  - echo $HEROKU_APP_NAME
+                  - curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
+                  - heroku container:login
+                  - heroku container:push web -a $HEROKU_APP_NAME
+                  - heroku container:release web -a $HEROKU_APP_NAME
   
