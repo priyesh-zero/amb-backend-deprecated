@@ -16,7 +16,7 @@
         "docker:migrate": "npx prisma migrate up --experimental",
         "docker:generate": "npx prisma generate",
         "docker:run": "node server.js",
-        "docker": "yarn docker:env && yarn docker:migrate && yarn docker:run",
+        "docker": "yarn docker:env && yarn docker:migrate && yarn docker:generate && yarn docker:run",
         "dev": "nodemon --exec ts-node server.ts"
     },
     "dependencies": {
