@@ -103,7 +103,7 @@ export class AuthRouter extends ResponseHandler implements IRouter {
          *       - application/json
          *     responses:
          *       200:
-         *         description: successful login if data.success = true and invalid credentials if data.success = false
+         *         description: returns an access token if refresh token is valid and refresh the refresh token
          *       500:
          *          description: if error occurs while the auth process then with err.message in data.message 500 response is sent
          */
