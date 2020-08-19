@@ -1,22 +1,26 @@
 import { Router, Response, Request } from "express";
 import { IRouter } from "../_interface/Router";
 import { ResponseHandler } from "../_base/Response";
-import Prisma from "../_base/Prisma";
-import { PrismaClient } from "@prisma/client";
-
-interface IPrisma {
-    prismaClient: PrismaClient;
-}
+import { Prisma } from "../_base/Prisma";
+import { UserDelegate } from "@prisma/client";
+import argon2 from "argon2";
+import { JsonWebToken } from "../_base/JsonWebTokens";
 
 export class AuthRouter extends ResponseHandler implements IRouter {
     router: Router;
-    prisma: IPrisma;
+
+    userModel: UserDelegate;
+
+    jwt: JsonWebToken;
+
     constructor() {
         super();
-        this.prisma = Prisma;
+        this.userModel = new Prisma().getUserModel();
+        this.jwt = new JsonWebToken();
         this.router = Router();
         this.login = this.login.bind(this);
         this.register = this.register.bind(this);
+        this.refreshToken = this.refreshToken.bind(this);
         this.addRoutes();
     }
 
@@ -71,8 +75,8 @@ export class AuthRouter extends ResponseHandler implements IRouter {
          *     produces:
          *       - application/json
          *     parameters:
-         *       - name: username
-         *         description: Username to use for login.
+         *       - name: email
+         *         description: email to use for login.
          *         in: formData
          *         required: true
          *         type: string
@@ -88,18 +92,56 @@ export class AuthRouter extends ResponseHandler implements IRouter {
          *          description: if error occurs while the auth process then with err.message in data.message 500 response is sent
          */
         this.router.post("/login", this.login);
+
+        /**
+         * @swagger
+         *
+         * /api/auth/refresh-token:
+         *   get:
+         *     description: Get an access token and return a new refresh token
+         *     produces:
+         *       - application/json
+         *     responses:
+         *       200:
+         *         description: successful login if data.success = true and invalid credentials if data.success = false
+         *       500:
+         *          description: if error occurs while the auth process then with err.message in data.message 500 response is sent
+         */
+        this.router.get("/refresh-token", this.refreshToken);
     }
 
     async login(_request: Request, response: Response) {
         try {
-            const { username, password } = _request.body;
-            if (username === "username" && password === "password") {
+            const { email, password } = _request.body;
+            const user = await this.userModel.findOne({
+                where: { email }
+            });
+            if (!user) {
+                this._response = {
+                    status: true,
+                    data: {
+                        success: false,
+                        message: "Invalid credentials"
+                    }
+                };
+            } else if (await argon2.verify(user.password, password)) {
+                response.cookie(
+                    "ARC",
+                    this.jwt.createRefreshToken({
+                        email: user.email,
+                        tokenVersion: user.tokenVersion
+                    }),
+                    { httpOnly: true, path: "/api/auth/refresh-token" }
+                );
                 this._response = {
                     status: true,
                     data: {
                         success: true,
-                        message: "Logged In Successfully",
-                        users: await this.prisma.prismaClient.user.findMany({})
+                        data: {
+                            accessToken: this.jwt.createAccessToken({
+                                email: user.email
+                            })
+                        }
                     }
                 };
             } else {
@@ -124,7 +166,8 @@ export class AuthRouter extends ResponseHandler implements IRouter {
 
     async register(_request: Request, response: Response) {
         try {
-            const user = await this.prisma.prismaClient.user.create({
+            _request.body.password = await argon2.hash(_request.body.password);
+            const user = await this.userModel.create({
                 data: {
                     ..._request.body
                 }
@@ -140,6 +183,67 @@ export class AuthRouter extends ResponseHandler implements IRouter {
             this._response = {
                 status: false,
                 error: e.message
+            };
+            this.respondWithError(response, 500, this._response);
+        }
+    }
+
+    async refreshToken(_request: Request, response: Response) {
+        try {
+            const tokenData = this.jwt.verifyRefreshToken(_request.cookies.ARC);
+            if (!tokenData) {
+                response.cookie("ARC", "", {
+                    httpOnly: true,
+                    path: "/api/auth/refresh-token"
+                });
+                this._response = {
+                    status: true,
+                    data: {
+                        accessToken: null
+                    },
+                    message: "Your Session has expired"
+                };
+            } else {
+                const user = await this.userModel.findOne({
+                    where: { email: tokenData.email }
+                });
+                if (user && user.tokenVersion === tokenData.tokenVersion) {
+                    response.cookie(
+                        "ARC",
+                        this.jwt.createRefreshToken({
+                            email: user.email,
+                            tokenVersion: user.tokenVersion
+                        }),
+                        { httpOnly: true, path: "/api/auth/refresh-token" }
+                    );
+                    this._response = {
+                        status: true,
+                        data: {
+                            accessToken: this.jwt.createAccessToken({
+                                email: ""
+                            })
+                        }
+                    };
+                } else {
+                    response.cookie("ARC", "", {
+                        httpOnly: true,
+                        path: "/api/auth/refresh-token"
+                    });
+                    this._response = {
+                        status: true,
+                        data: {
+                            accessToken: null
+                        },
+                        message: "Your Session has expired"
+                    };
+                }
+            }
+
+            this.respondWithSuccess(response, 200, this._response);
+        } catch (err) {
+            this._response = {
+                status: false,
+                error: err.message
             };
             this.respondWithError(response, 500, this._response);
         }
