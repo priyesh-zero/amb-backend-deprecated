@@ -10,7 +10,7 @@
         "build:clean": "rimraf dist",
         "build:core": "tsc",
         "build:post": "cp prisma dist -r",
-        "build": "yarn build:clean && yarn build:core && yarn build:post",
+        "build": "yarn docker:generate && yarn build:clean && yarn build:core && yarn build:post",
         "build:run": "cd dist && node server.js && cd ..",
         "docker:env": "echo \"DATABASE_URL=\"$DATABASE_URL > prisma/.env",
         "docker:migrate": "npx prisma migrate up --experimental",
