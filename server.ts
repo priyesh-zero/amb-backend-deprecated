@@ -17,14 +17,7 @@ class Server {
     this.applyPreMiddleware();
     this.addRoutes();
     this.initServer();
-    this.whitelist = [
-      "https://musing-mclean-b082b4.netlify.app",
-      "https://ambulancia-backend.herokuapp.com",
-      "http://localhost:4200",
-      "http://127.0.0.1:3000",
-      "http://127.0.0.1:4000",
-      "https://ambulancia.netlify.app",
-    ];
+    this.whitelist = JSON.parse(process.env.whitelist || "[]");
   }
 
   applyPreMiddleware() {
