@@ -22,7 +22,6 @@ export class AuthRouter extends ResponseHandler implements IRouter {
     this.register = this.register.bind(this);
     this.refreshToken = this.refreshToken.bind(this);
     this.addRoutes();
-    this.userModel.deleteMany({});
   }
 
   addRoutes() {
