@@ -1,8 +1,8 @@
 export interface RefreshTokenData {
-    email: string;
-    tokenVersion: Number;
+  id: number;
+  tokenVersion: Number;
 }
 
 export interface AccessTokenData {
-    email: string;
+  id: number;
 }
