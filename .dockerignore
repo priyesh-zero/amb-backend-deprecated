@@ -7,3 +7,5 @@
 !index.sh
 !tsconfig.json
 !package.json
+!middlewares/**/*
+!@types/**/*
